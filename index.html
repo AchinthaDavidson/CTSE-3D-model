@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Latest A-Frame Library -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <!-- Latest AR.js Library -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <!-- Animation Mixer -->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    
+    <script>
+        // Custom animations
+        AFRAME.registerComponent('bounce', {
+            init: function() {
+                this.bounce = 0;
+                this.direction = 1;
+            },
+            tick: function() {
+                this.bounce += 0.01 * this.direction;
+                if (this.bounce >= 1) this.direction = -1;
+                if (this.bounce <= 0) this.direction = 1;
+                this.el.object3D.position.y = this.bounce;
+            }
+        });
+
+        AFRAME.registerComponent('float', {
+            init: function() {
+                this.float = 0;
+            },
+            tick: function() {
+                this.float += 0.01;
+                this.el.object3D.position.y = Math.sin(this.float) * 0.2;
+            }
+        });
+
+        // Effect components
+        AFRAME.registerComponent('fire-effect', {
+            init: function() {
+                this.createFireEffect();
+            },
+            createFireEffect: function() {
+                const fire = document.createElement('a-entity');
+                fire.setAttribute('geometry', {
+                    primitive: 'sphere',
+                    radius: 0.1
+                });
+                fire.setAttribute('material', {
+                    color: '#ff4400',
+                    transparent: true,
+                    opacity: 0.7
+                });
+                fire.setAttribute('animation', {
+                    property: 'scale',
+                    from: '0.1 0.1 0.1',
+                    to: '0.5 0.5 0.5',
+                    dur: 1000,
+                    loop: true,
+                    dir: 'alternate'
+                });
+                this.el.appendChild(fire);
+            }
+        });
+
+        AFRAME.registerComponent('smoke-effect', {
+            init: function() {
+                this.createSmokeEffect();
+            },
+            createSmokeEffect: function() {
+                const smoke = document.createElement('a-entity');
+                smoke.setAttribute('geometry', {
+                    primitive: 'sphere',
+                    radius: 0.2
+                });
+                smoke.setAttribute('material', {
+                    color: '#888888',
+                    transparent: true,
+                    opacity: 0.5
+                });
+                smoke.setAttribute('animation', {
+                    property: 'scale',
+                    from: '0.2 0.2 0.2',
+                    to: '1 1 1',
+                    dur: 2000,
+                    loop: true
+                });
+                this.el.appendChild(smoke);
+            }
+        });
+
+        AFRAME.registerComponent('leaf-effect', {
+            init: function() {
+                this.createLeafEffect();
+            },
+            createLeafEffect: function() {
+                const leaf = document.createElement('a-entity');
+                leaf.setAttribute('geometry', {
+                    primitive: 'box',
+                    width: 0.1,
+                    height: 0.1,
+                    depth: 0.1
+                });
+                leaf.setAttribute('material', {
+                    color: '#44ff44',
+                    transparent: true,
+                    opacity: 0.7
+                });
+                leaf.setAttribute('animation', {
+                    property: 'rotation',
+                    to: '0 360 0',
+                    dur: 2000,
+                    loop: true
+                });
+                this.el.appendChild(leaf);
+            }
+        });
+
+        AFRAME.registerComponent('sparkle-effect', {
+            init: function() {
+                this.createSparkleEffect();
+            },
+            createSparkleEffect: function() {
+                const sparkle = document.createElement('a-entity');
+                sparkle.setAttribute('geometry', {
+                    primitive: 'sphere',
+                    radius: 0.05
+                });
+                sparkle.setAttribute('material', {
+                    color: '#ffff00',
+                    transparent: true,
+                    opacity: 0.8
+                });
+                sparkle.setAttribute('animation', {
+                    property: 'scale',
+                    from: '0.05 0.05 0.05',
+                    to: '0.2 0.2 0.2',
+                    dur: 1000,
+                    loop: true,
+                    dir: 'alternate'
+                });
+                this.el.appendChild(sparkle);
+            }
+        });
+
+        // Sound handling component with improved implementation
+        AFRAME.registerComponent('sound-handler', {
+            init: function() {
+                this.isPlaying = false;
+                this.sound = null;
+                
+                // Wait for sound component to be ready
+                this.el.addEventListener('componentinitialized', (evt) => {
+                    if (evt.detail.name === 'sound') {
+                        this.sound = this.el.components.sound;
+                        console.log('Sound component initialized for:', this.el.id);
+                    }
+                });
+
+                // Add click event listener
+                this.el.addEventListener('click', () => {
+                    console.log('Click detected on:', this.el.id);
+                    if (!this.sound) {
+                        console.error('Sound component not initialized');
+                        return;
+                    }
+
+                    if (this.isPlaying) {
+                        console.log('Stopping sound for:', this.el.id);
+                        this.sound.stopSound();
+                        this.isPlaying = false;
+                    } else {
+                        console.log('Playing sound for:', this.el.id);
+                        this.sound.playSound();
+                        this.isPlaying = true;
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;' renderer="antialias: true">
+        
+        <!-- Assets -->
+        <a-assets>
+            <!-- 3D Models -->
+            <a-asset-item id="dragon" src="models/dragon.glb"></a-asset-item>
+            <a-asset-item id="car" src="models/car.glb"></a-asset-item>
+            <a-asset-item id="tree" src="models/tree.glb"></a-asset-item>
+            <a-asset-item id="ball" src="models/ball.glb"></a-asset-item>
+            
+            <!-- Sound Effects -->
+            <audio id="dragon-sound" src="sounds/dragon-roar.wav" preload="auto"></audio>
+            <audio id="car-sound" src="sounds/car-engine.wav" preload="auto"></audio>
+            <audio id="nature-sound" src="sounds/nature.mp3" preload="auto"></audio>
+            <audio id="ball-sound" src="sounds/bounce.wav" preload="auto"></audio>
+        </a-assets>
+
+        <!-- Dragon Marker (Using Hiro) -->
+        <a-marker preset="hiro">
+            <a-entity
+                id="dragon-entity"
+                gltf-model="#dragon"
+                position="0 0 0"
+                scale="0.05 0.05 0.05"
+                animation-mixer="clip: *"
+                animation="property: rotation; to: 0 360 0; dur: 5000; loop: true"
+                sound="src: #dragon-sound; volume: 1; loop: false; autoplay: false"
+                sound-handler>
+                <a-entity position="0 1 0" fire-effect></a-entity>
+            </a-entity>
+        </a-marker>
+
+        <!-- Car Marker (Using Pattern) -->
+        <a-marker type="pattern" url="markers/pattern-car.patt">
+            <a-entity
+                id="car-entity"
+                gltf-model="#car"
+                position="0 0 0"
+                scale="0.1 0.1 0.1"
+                animation-mixer
+                animation="property: position; from: -2 0 0; to: 2 0 0; dur: 4000; loop: true; dir: alternate"
+                sound="src: #car-sound; volume: 1; loop: false; autoplay: false"
+                sound-handler>
+                <a-entity position="0 0.5 -1" smoke-effect></a-entity>
+            </a-entity>
+        </a-marker>
+
+        <!-- Tree Marker (Using Pattern 1) -->
+        <a-marker type="pattern" url="markers/pattern-tree.patt">
+            <a-entity
+                id="tree-entity"
+                gltf-model="#tree"
+                position="0 0 0"
+                scale="0.01 0.01 0.01"
+                float
+                animation="property: rotation; to: 0 360 0; dur: 10000; loop: true"
+                sound="src: #nature-sound; volume: 1; loop: false; autoplay: false"
+                sound-handler>
+                <a-entity position="0 2 0" leaf-effect></a-entity>
+            </a-entity>
+        </a-marker>
+
+        <!-- Ball Marker (Using Pattern 2) -->
+        <a-marker type="pattern" url="markers/pattern-ball.patt">
+            <a-entity
+                id="ball-entity"
+                gltf-model="#ball"
+                position="0 0 0"
+                scale="0.3 0.3 0.3"
+                bounce
+                animation-mixer="clip: *"
+                sound="src: #ball-sound; volume: 1; loop: false; autoplay: false"
+                sound-handler>
+                <a-entity position="0 0.5 0" sparkle-effect></a-entity>
+            </a-entity>
+        </a-marker>
+
+        <!-- Camera -->
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
+</html>
