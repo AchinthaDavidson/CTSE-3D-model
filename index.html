@@ -1,262 +1,198 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <!-- Latest A-Frame Library -->
+  <head>
+    <title>AR Models: Dragon, Owl, Frog, Penguin</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Latest AR.js Library -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <!-- Animation Mixer -->
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-    
-    <script>
-        // Custom animations
-        AFRAME.registerComponent('bounce', {
-            init: function() {
-                this.bounce = 0;
-                this.direction = 1;
-            },
-            tick: function() {
-                this.bounce += 0.01 * this.direction;
-                if (this.bounce >= 1) this.direction = -1;
-                if (this.bounce <= 0) this.direction = 1;
-                this.el.object3D.position.y = this.bounce;
-            }
-        });
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.min.js"></script>
+  </head>
+  <body style="margin: 0; overflow: hidden;">
+    <a-scene embedded arjs>
+      <a-assets>
+        <!-- Models -->
+        <a-asset-item id="dragonModel" src="models/dragon.glb"></a-asset-item>
+        <a-asset-item id="owlModel" src="models/owl.glb"></a-asset-item>
+        <a-asset-item id="frogModel" src="models/frog.glb"></a-asset-item>
+        <a-asset-item id="penguinModel" src="models/penguin.glb"></a-asset-item>
 
-        AFRAME.registerComponent('float', {
-            init: function() {
-                this.float = 0;
-            },
-            tick: function() {
-                this.float += 0.01;
-                this.el.object3D.position.y = Math.sin(this.float) * 0.2;
-            }
-        });
+        <!-- Sounds -->
+        <audio id="roarSound" src="sounds/dragon-roar.wav" preload="auto"></audio>
+        <audio id="owlSound" src="sounds/owl.mp3" preload="auto"></audio>
+        <audio id="frogSound" src="sounds/frog.mp3" preload="auto"></audio>
+        <audio id="penguinSound" src="sounds/penguin.mp3" preload="auto"></audio>
+      </a-assets>
 
-        // Effect components
-        AFRAME.registerComponent('fire-effect', {
-            init: function() {
-                this.createFireEffect();
-            },
-            createFireEffect: function() {
-                const fire = document.createElement('a-entity');
-                fire.setAttribute('geometry', {
-                    primitive: 'sphere',
-                    radius: 0.1
-                });
-                fire.setAttribute('material', {
-                    color: '#ff4400',
-                    transparent: true,
-                    opacity: 0.7
-                });
-                fire.setAttribute('animation', {
-                    property: 'scale',
-                    from: '0.1 0.1 0.1',
-                    to: '0.5 0.5 0.5',
-                    dur: 1000,
-                    loop: true,
-                    dir: 'alternate'
-                });
-                this.el.appendChild(fire);
-            }
-        });
+      <!-- Lights -->
+      <a-light type="ambient" color="#ffffff" intensity="0.7"></a-light>
+      <a-light type="directional" color="#ffffff" intensity="1" position="1 2 1"></a-light>
 
-        AFRAME.registerComponent('smoke-effect', {
-            init: function() {
-                this.createSmokeEffect();
-            },
-            createSmokeEffect: function() {
-                const smoke = document.createElement('a-entity');
-                smoke.setAttribute('geometry', {
-                    primitive: 'sphere',
-                    radius: 0.2
-                });
-                smoke.setAttribute('material', {
-                    color: '#888888',
-                    transparent: true,
-                    opacity: 0.5
-                });
-                smoke.setAttribute('animation', {
-                    property: 'scale',
-                    from: '0.2 0.2 0.2',
-                    to: '1 1 1',
-                    dur: 2000,
-                    loop: true
-                });
-                this.el.appendChild(smoke);
-            }
-        });
+      <!-- Dragon Marker -->
+      <a-marker preset="hiro" id="dragonMarker">
+        <a-entity
+          id="dragon"
+          gltf-model="#dragonModel"
+          scale="0.2 0.2 0.2"
+          position="0 0 0"
+          sound="src: #roarSound; autoplay: false; loop: true;"
+          drag-rotate-zoom
+        >
+          <a-entity
+            position="0 0.5 0.2"
+            particle-system="preset: fire; particleCount: 150; color: #ff5500, #ffaa00"
+          ></a-entity>
+        </a-entity>
+      </a-marker>
 
-        AFRAME.registerComponent('leaf-effect', {
-            init: function() {
-                this.createLeafEffect();
-            },
-            createLeafEffect: function() {
-                const leaf = document.createElement('a-entity');
-                leaf.setAttribute('geometry', {
-                    primitive: 'box',
-                    width: 0.1,
-                    height: 0.1,
-                    depth: 0.1
-                });
-                leaf.setAttribute('material', {
-                    color: '#44ff44',
-                    transparent: true,
-                    opacity: 0.7
-                });
-                leaf.setAttribute('animation', {
-                    property: 'rotation',
-                    to: '0 360 0',
-                    dur: 2000,
-                    loop: true
-                });
-                this.el.appendChild(leaf);
-            }
-        });
+      <!-- Owl Marker -->
+      <a-marker type="pattern" url="markers/pattern-owl.patt" id="owlMarker">
+        <a-entity
+          id="owl"
+          gltf-model="#owlModel"
+          scale="0.3 0.3 0.3"
+          position="0 0 0"
+          sound="src: #owlSound; autoplay: false; loop: true;"
+          drag-rotate-zoom
+        >
+          <a-entity
+            position="0 1 0"
+            particle-system="preset: snow; particleCount: 200; color: #ffffff, #aaddff; size: 1.5; opacity: 0.8"
+          ></a-entity>
+        </a-entity>
+      </a-marker>
 
-        AFRAME.registerComponent('sparkle-effect', {
-            init: function() {
-                this.createSparkleEffect();
-            },
-            createSparkleEffect: function() {
-                const sparkle = document.createElement('a-entity');
-                sparkle.setAttribute('geometry', {
-                    primitive: 'sphere',
-                    radius: 0.05
-                });
-                sparkle.setAttribute('material', {
-                    color: '#ffff00',
-                    transparent: true,
-                    opacity: 0.8
-                });
-                sparkle.setAttribute('animation', {
-                    property: 'scale',
-                    from: '0.05 0.05 0.05',
-                    to: '0.2 0.2 0.2',
-                    dur: 1000,
-                    loop: true,
-                    dir: 'alternate'
-                });
-                this.el.appendChild(sparkle);
-            }
-        });
+      <!-- Frog Marker -->
+      <a-marker type="pattern" url="markers/pattern-frog.patt" id="frogMarker">
+        <a-entity
+          id="frog"
+          gltf-model="#frogModel"
+          scale="0.3 0.3 0.3"
+          position="0 0 0"
+          sound="src: #frogSound; autoplay: false; loop: true;"
+          drag-rotate-zoom
+        >
+          <a-entity
+            position="0 1 0"
+            particle-system="preset: snow; particleCount: 200; color: #ffffff, #aaddff; size: 1.5; opacity: 0.8"
+          ></a-entity>
+        </a-entity>
+      </a-marker>
 
-        // Sound handling component with improved implementation
-        AFRAME.registerComponent('sound-handler', {
-            init: function() {
-                this.isPlaying = false;
-                this.sound = null;
-                
-                // Wait for sound component to be ready
-                this.el.addEventListener('componentinitialized', (evt) => {
-                    if (evt.detail.name === 'sound') {
-                        this.sound = this.el.components.sound;
-                        console.log('Sound component initialized for:', this.el.id);
-                    }
-                });
+      <!-- Penguin Marker -->
+      <a-marker type="pattern" url="markers/pattern-penguin.patt" id="penguinMarker">
+        <a-entity
+          id="penguin"
+          gltf-model="#penguinModel"
+          scale="0.5 0.5 0.5"
+          position="0 0 0"
+          sound="src: #penguinSound; autoplay: false; loop: true;"
+          drag-rotate-zoom
+        >
+          <a-entity
+            position="0 1 0"
+            particle-system="preset: snow; particleCount: 200; color: #ffffff, #aaddff; size: 1.5; opacity: 0.8"
+          ></a-entity>
+        </a-entity>
+      </a-marker>
 
-                // Add click event listener
-                this.el.addEventListener('click', () => {
-                    console.log('Click detected on:', this.el.id);
-                    if (!this.sound) {
-                        console.error('Sound component not initialized');
-                        return;
-                    }
-
-                    if (this.isPlaying) {
-                        console.log('Stopping sound for:', this.el.id);
-                        this.sound.stopSound();
-                        this.isPlaying = false;
-                    } else {
-                        console.log('Playing sound for:', this.el.id);
-                        this.sound.playSound();
-                        this.isPlaying = true;
-                    }
-                });
-            }
-        });
-    </script>
-</head>
-<body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;' renderer="antialias: true">
-        
-        <!-- Assets -->
-        <a-assets>
-            <!-- 3D Models -->
-            <a-asset-item id="dragon" src="models/dragon.glb"></a-asset-item>
-            <a-asset-item id="car" src="models/car.glb"></a-asset-item>
-            <a-asset-item id="tree" src="models/tree.glb"></a-asset-item>
-            <a-asset-item id="ball" src="models/ball.glb"></a-asset-item>
-            
-            <!-- Sound Effects -->
-            <audio id="dragon-sound" src="sounds/dragon-roar.wav" preload="auto"></audio>
-            <audio id="car-sound" src="sounds/car-engine.wav" preload="auto"></audio>
-            <audio id="nature-sound" src="sounds/nature.mp3" preload="auto"></audio>
-            <audio id="ball-sound" src="sounds/bounce.wav" preload="auto"></audio>
-        </a-assets>
-
-        <!-- Dragon Marker (Using Hiro) -->
-        <a-marker preset="hiro">
-            <a-entity
-                id="dragon-entity"
-                gltf-model="#dragon"
-                position="0 0 0"
-                scale="0.05 0.05 0.05"
-                animation-mixer="clip: *"
-                animation="property: rotation; to: 0 360 0; dur: 5000; loop: true"
-                sound="src: #dragon-sound; volume: 1; loop: false; autoplay: false"
-                sound-handler>
-                <a-entity position="0 1 0" fire-effect></a-entity>
-            </a-entity>
-        </a-marker>
-
-        <!-- Car Marker (Using Pattern) -->
-        <a-marker type="pattern" url="markers/pattern-car.patt">
-            <a-entity
-                id="car-entity"
-                gltf-model="#car"
-                position="0 0 0"
-                scale="0.1 0.1 0.1"
-                animation-mixer
-                animation="property: position; from: -2 0 0; to: 2 0 0; dur: 4000; loop: true; dir: alternate"
-                sound="src: #car-sound; volume: 1; loop: false; autoplay: false"
-                sound-handler>
-                <a-entity position="0 0.5 -1" smoke-effect></a-entity>
-            </a-entity>
-        </a-marker>
-
-        <!-- Tree Marker (Using Pattern 1) -->
-        <a-marker type="pattern" url="markers/pattern-tree.patt">
-            <a-entity
-                id="tree-entity"
-                gltf-model="#tree"
-                position="0 0 0"
-                scale="0.01 0.01 0.01"
-                float
-                animation="property: rotation; to: 0 360 0; dur: 10000; loop: true"
-                sound="src: #nature-sound; volume: 1; loop: false; autoplay: false"
-                sound-handler>
-                <a-entity position="0 2 0" leaf-effect></a-entity>
-            </a-entity>
-        </a-marker>
-
-        <!-- Ball Marker (Using Pattern 2) -->
-        <a-marker type="pattern" url="markers/pattern-ball.patt">
-            <a-entity
-                id="ball-entity"
-                gltf-model="#ball"
-                position="0 0 0"
-                scale="0.3 0.3 0.3"
-                bounce
-                animation-mixer="clip: *"
-                sound="src: #ball-sound; volume: 1; loop: false; autoplay: false"
-                sound-handler>
-                <a-entity position="0 0.5 0" sparkle-effect></a-entity>
-            </a-entity>
-        </a-marker>
-
-        <!-- Camera -->
-        <a-entity camera></a-entity>
+      <a-entity camera></a-entity>
     </a-scene>
-</body>
+
+    <script>
+      // Drag, rotate, zoom component
+      AFRAME.registerComponent('drag-rotate-zoom', {
+        init: function () {
+          this.isDragging = false;
+          this.previousX = 0;
+          this.previousY = 0;
+
+          this.el.sceneEl.canvas.addEventListener('mousedown', (e) => {
+            this.isDragging = true;
+            this.previousX = e.clientX;
+            this.previousY = e.clientY;
+          });
+
+          window.addEventListener('mouseup', () => {
+            this.isDragging = false;
+          });
+
+          this.el.sceneEl.canvas.addEventListener('mousemove', (e) => {
+            if (!this.isDragging) return;
+            const dx = e.clientX - this.previousX;
+            const dy = e.clientY - this.previousY;
+            this.previousX = e.clientX;
+            this.previousY = e.clientY;
+            this.el.object3D.rotation.y += dx * 0.01;
+            this.el.object3D.rotation.x += dy * 0.005;
+          });
+
+          this.el.sceneEl.canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+              this.isDragging = true;
+              this.previousX = e.touches[0].clientX;
+              this.previousY = e.touches[0].clientY;
+            } else if (e.touches.length === 2) {
+              this.isDragging = false;
+              this.previousDistance = this.getTouchDistance(e.touches);
+            }
+          });
+
+          window.addEventListener('touchend', () => {
+            this.isDragging = false;
+          });
+
+          this.el.sceneEl.canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && this.isDragging) {
+              const dx = e.touches[0].clientX - this.previousX;
+              const dy = e.touches[0].clientY - this.previousY;
+              this.previousX = e.touches[0].clientX;
+              this.previousY = e.touches[0].clientY;
+              this.el.object3D.rotation.y += dx * 0.01;
+              this.el.object3D.rotation.x += dy * 0.005;
+            } else if (e.touches.length === 2) {
+              const newDistance = this.getTouchDistance(e.touches);
+              const scaleChange = newDistance / this.previousDistance;
+              this.previousDistance = newDistance;
+              let newScale = this.el.object3D.scale.x * scaleChange;
+              newScale = Math.min(Math.max(newScale, 0.05), 2.0); // Updated range
+              this.el.object3D.scale.set(newScale, newScale, newScale);
+            }
+          });
+
+          this.el.sceneEl.canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            let scaleFactor = 1 + (e.deltaY > 0 ? -0.05 : 0.05);
+            let newScale = this.el.object3D.scale.x * scaleFactor;
+            newScale = Math.min(Math.max(newScale, 0.05), 2.0); // Updated range
+            this.el.object3D.scale.set(newScale, newScale, newScale);
+          });
+        },
+
+        getTouchDistance(touches) {
+          const dx = touches[0].clientX - touches[1].clientX;
+          const dy = touches[0].clientY - touches[1].clientY;
+          return Math.sqrt(dx * dx + dy * dy);
+        }
+      });
+
+      // Play/stop sounds on marker found/lost
+      const markers = [
+        { id: '#dragonMarker', model: '#dragon' },
+        { id: '#owlMarker', model: '#owl' },
+        { id: '#frogMarker', model: '#frog' },
+        { id: '#penguinMarker', model: '#penguin' }
+      ];
+
+      markers.forEach(({ id, model }) => {
+        const marker = document.querySelector(id);
+        const entity = document.querySelector(model);
+
+        marker.addEventListener('markerFound', () => {
+          if (entity.components.sound) entity.components.sound.playSound();
+        });
+
+        marker.addEventListener('markerLost', () => {
+          if (entity.components.sound) entity.components.sound.stopSound();
+        });
+      });
+    </script>
+  </body>
 </html>
